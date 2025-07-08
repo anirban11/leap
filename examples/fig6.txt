@@ -1,0 +1,47 @@
+# This example is taken from 
+# Grinchtein, O., Jonsson, B., Leucker, M.: 
+# "Learning of event-recording automata"
+# Theoretical Computer Science(2010)
+
+events:a
+[
+EPSILON;
+pos
+]
+[
+(a,a==0);
+(a,a>=1);
+pos
+]
+[
+(a,a==0);
+(a,a==0);
+pos
+]
+[
+(a,a>0);
+pos
+]
+[
+(a,a==0);
+(a,a==0);
+(a,a>=0);
+(a,a==0);
+pos
+]
+[
+(a,a==0);
+neg
+]
+[
+(a,a==0);
+(a,a==0);
+(a,a>=0);
+neg
+]
+[
+(a,a==0);
+(a,a>=1);
+(a,a>=0);
+neg
+]
