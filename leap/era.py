@@ -1,4 +1,6 @@
 import copy
+import networkx as nx
+import pydot
 
 import event
 import expression
@@ -93,15 +95,51 @@ class ERA:
 
     def __str__(self) -> str:
         output_str = f'number of states: {self.states_count()}\n'
+        for state in self.states:
+            if state.status == False:
+                continue
+            output_str += f'location:{state}('
+            if state.init:
+                output_str += 'initial'
+            if state.accepting:
+                if state.init:
+                    output_str += ', '
+                output_str += 'accepting'
+            output_str += ')\n'
+
         for state_i in self.states:
             for state_j in self.states:
                 for each_transition in self.transitions[state_i.index()][state_j.index()]:
                     output_str += f'edge:{each_transition} \n'
-        for state in self.states:
-            if state.accepting:
-                output_str += f'{state} accepting  '
         return output_str
+    
+    def to_dot(self, filename: str) -> None:
+        out_era = nx.MultiDiGraph()
+        states_id = {i: self.states[i] for i in range(len(self.states)) if self.states[i].status == True}
 
+        # create nodes
+        for i in states_id:
+            out_era.add_node(i, label=states_id[i].name)
+        # create initial node
+        initial_node = "__start__"
+        out_era.add_node(initial_node, label="", shape="none", width=0, height=0)
+        # mark accepting states with double circles
+        for i in states_id:
+            if self.states[i].accepting == True:
+                out_era.nodes[i]['shape'] = 'doublecircle'
+        
+        # add an incoming transition to the starting state
+        for i in states_id:
+            if self.states[i].init == True:
+                out_era.add_edge(initial_node, i)
+        # add all the transitions between states
+        for qi in states_id:
+            for qj in states_id:
+                for each_transition in self.transitions[qi][qj]:
+                    out_era.add_edge(qi, qj, label=f'{each_transition.event}, {each_transition.guard}')
+        # return nx.drawing.nx_pydot.to_pydot(out_era).to_string()
+        nx.drawing.nx_pydot.write_dot(out_era, filename)
+    
     def states_count(self) -> int:
         ''' return the number of states present in an ERA
 
@@ -209,3 +247,8 @@ class ERA:
         for i in self.transitions_on_event.keys():
             copied_era.transitions_on_event[i] = [t for t in self.transitions_on_event[i]]
         return copied_era
+    
+
+if __name__ == '__main__':
+    era = ERA()
+    print(era)
